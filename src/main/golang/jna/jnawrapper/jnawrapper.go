@@ -3,6 +3,7 @@ package main
 import "C"
 import (
 	"fmt"
+	"reflect"
 	"unsafe"
 )
 
@@ -28,6 +29,22 @@ func CountStrings(cStrings **C.char, length C.int) C.int {
 
 	// Use the slice as needed
 	return C.int(len(slice))
+}
+
+func ProcessStrings(strings **C.char, count C.int) {
+	// Convert the C array of strings into a Go slice of strings
+	hdr := reflect.SliceHeader{
+		Data: uintptr(unsafe.Pointer(strings)),
+		Len:  int(count),
+		Cap:  int(count),
+	}
+	goStrings := *(*[]*C.char)(unsafe.Pointer(&hdr))
+
+	// Now you can range over goStrings and use C.GoString to convert each *C.char to a Go string
+	for _, str := range goStrings {
+		goStr := C.GoString(str)
+		fmt.Println(goStr)
+	}
 }
 
 func main() {
